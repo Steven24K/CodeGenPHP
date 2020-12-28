@@ -4,11 +4,13 @@ import * as path from "path"
 import { CreateApiCall_snippet, CreateRelation_snippet, DeleteApiCall_snippet, DeleteRelation_snippet, GetApiCall_snippet, GetRelation_snippet, UpdateApiCall_snippet, UpdateRelation_snippet } from "../snippets/api_snippets"
 import { CreateConfig_snippet } from "../snippets/config_snippets"
 import { initDatabase_snippet } from "../snippets/sql_snippets"
-import { walk_dir } from "../utils/FileWritng"
+import {AppToSnippets} from "../snippets/snippet_overview"
+import { walk_dir, WriteToFile } from "../utils/FileWritng"
 import { Optional } from "../utils/types"
 import { Model } from "./Model"
 import { Permission } from "./Permission"
 import { Relation } from "./Relation"
+import { Func } from "../utils/Func"
 
 export interface Application {
     projectName: string
@@ -69,9 +71,6 @@ export const Application = (name: string, options: Optional<Application> = defau
 
     run: function (dir = '../Samples'): void {
 
-        let models = this.models.toArray().map(m => m[1])
-        let relations = this.relations.toArray().map(m => m[1])
-
         let mainDir = `${dir}/${this.projectName.replace(/ /g, '_')}`
         fs.ensureDirSync(mainDir)
 
@@ -96,57 +95,11 @@ export const Application = (name: string, options: Optional<Application> = defau
 
         })
 
-
-        // Generate config file 
-        let config = CreateConfig_snippet(models)
-        fs.writeFileSync(`${mainDir}/config.php`, config)
-        console.log('Generated config.php')
-
-        // Generate init file 
-        let init_file = initDatabase_snippet(models, relations)
-        fs.writeFileSync(`${mainDir}/init.php`, init_file)
-        console.log('Generate init.php')
-
-
-        // Generate api
-        models.forEach(model => {
-            let get = GetApiCall_snippet(model)
-            let create = CreateApiCall_snippet(model)
-            let update = UpdateApiCall_snippet(model)
-            let del = DeleteApiCall_snippet(model)
-
-            let model_dir = `${mainDir}/api/${this.api_version}/${model.name}`
-            fs.ensureDirSync(model_dir)
-
-            fs.writeFileSync(`${model_dir}/Get.php`, get)
-            fs.writeFileSync(`${model_dir}/Create.php`, create)
-            fs.writeFileSync(`${model_dir}/Update.php`, update)
-            fs.writeFileSync(`${model_dir}/Delete.php`, del)
-
-            console.log(`Generated api for ${model.name}`)
-
+        // Itterate over all snippets
+        AppToSnippets.f(this).forEach(snippet => {
+            WriteToFile(mainDir).f(snippet)
         })
-
-
-        // TODO: Make API for relationships
-        relations.forEach(relation => {
-            let get = GetRelation_snippet(relation)
-            let create = CreateRelation_snippet(relation)
-            let update = UpdateRelation_snippet(relation)
-            let del = DeleteRelation_snippet(relation)
-
-            let relation_dir = `${mainDir}/api/${this.api_version}/${relation.source}_${relation.target}`
-            fs.ensureDirSync(relation_dir)
-
-            fs.writeFileSync(`${relation_dir}/Get.php`, get)
-            fs.writeFileSync(`${relation_dir}/Create.php`, create)
-            fs.writeFileSync(`${relation_dir}/Update.php`, update)
-            fs.writeFileSync(`${relation_dir}/Delete.php`, del)
-
-            console.log(`Generated api for ${relation.source}_${relation.target}`)
-
-        })
-
-
+        
     }
+
 })

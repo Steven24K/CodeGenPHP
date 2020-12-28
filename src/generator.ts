@@ -49,12 +49,12 @@ Application('A new App')
 
 /**
  * TODO:
- * - Refactor the run method to itterate over a list of snippets 
  * - Make Application lazy
  * - Add contraint for permissions when only a specific user can do an opperation on a relation or entity. 
  * - Think about how we want to manage migrations.
  * - Build a user inteface for the generated API. (React)
  * - Automate automate the genration of the user interface. 
+ * - Convert to graph to be able to draw the ERD on a canvas.
  */
 
 

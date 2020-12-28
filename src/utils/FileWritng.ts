@@ -1,6 +1,8 @@
 
 import * as fs from "fs-extra"
 import * as path from "path"
+import { Func } from "./Func"
+import { Snippet } from "./types"
 
 // https://github.com/fs-utils/fs-readdir-recursive/blob/master/index.js
 export const walk_dir = (root: string, files: string[] = [], prefix = ''): string[] => {
@@ -16,3 +18,11 @@ export const walk_dir = (root: string, files: string[] = [], prefix = ''): strin
 
     return files
 }
+
+
+
+export const WriteToFile = (mainDir: string): Func<Snippet, void> => Func(snippet => {
+    fs.ensureDirSync(path.dirname(`${mainDir}/${snippet.name}`))
+    fs.writeFileSync(`${mainDir}/${snippet.name}`, snippet.content)
+    console.log(`Generated ${mainDir}/${snippet.name}`)
+})

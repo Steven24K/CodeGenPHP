@@ -4,9 +4,9 @@ import { Relation } from "../Spec/Relation"
 import { Fun } from "../utils/types"
 import { Permission_snippet } from "./permission_snippets"
 
-export const HtmlComment = (text: string): string => `<!--${text}-->`
+const HtmlComment = (text: string): string => `<!--${text}-->`
 
-export const PhpCode = (code: string): string => `
+const PhpCode = (code: string): string => `
 ${HtmlComment('Made by CodeGenPHP - author: Steven K https://stevenkoerts.nl/')}
 
 <?php
