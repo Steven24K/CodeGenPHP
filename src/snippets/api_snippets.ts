@@ -64,12 +64,12 @@ let attr_parser: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs
 
 let isStringLike: Fun<Attribute, boolean> = a => a.type == 'TEXT' || a.type == 'CHAR' || a.type == 'LONGTEXT' || a.type == 'MEDIUMTEXT'
     || a.type == 'PASSWORD' || a.type == 'TINYTEXT' || a.type == 'VARCHAR' || a.type == "USERNAME"
-let attr_values: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + (isStringLike(x) ? `'$data->${x.name}'` : `$data->${x.name}`) + ((attr.length - 1 != i) ? ', ' : ''), '')
+let shouldBeEncrypted: Fun<Attribute, boolean> = a => a.type == 'PASSWORD'
+let attr_values: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + (shouldBeEncrypted(x) ? `" . "'" . sodium_crypto_pwhash_scryptsalsa208sha256_str($data->${x.name}) . "'" . "` : isStringLike(x) ? `'$data->${x.name}'` : `$data->${x.name}`) + ((attr.length - 1 != i) ? ', ' : ''), '')
 let attr_validation_string: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + `isset($data->${x.name})` + ((attr.length - 1 != i) ? ' and ' : ''), '')
 
 export const CreateApiCall_snippet = (model: Model) => {
     let attributes = model.attributes.toIndexedSeq().toArray()
-
     let snippet = `
     $data = json_decode(file_get_contents("php://input")); 
     

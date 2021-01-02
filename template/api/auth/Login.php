@@ -24,6 +24,8 @@ $data = json_decode(file_get_contents("php://input"));
 
 if (isset($data->UserName) and isset($data->Password) and isset($data->role)) {
     if (in_array($data->role, LOGGABLE_ENTITIES)) {
+
+        
         $encrypted_password = sodium_crypto_pwhash_scryptsalsa208sha256_str($data->Password);
         $sql = "SELECT Id FROM $role WHERE UserName = $data->UserName and Password = $encrypted_password";
         $result = $connection->ExecuteQuery($sql);
@@ -38,6 +40,8 @@ if (isset($data->UserName) and isset($data->Password) and isset($data->role)) {
         } else {
             echo json_encode(new HttpResult("Wrong credentials", 200));
         }
+
+
     } else {
         echo json_encode(new HttpResult("Role: " . $data->role . " does not exists", 200));
     }

@@ -22,6 +22,7 @@ export const walk_dir = (root: string, files: string[] = [], prefix = ''): strin
 
 
 export const WriteToFile = (mainDir: string): Func<Snippet, void> => Func(snippet => {
+    // Todo: Add a comparison if the file allready exists and is not changed with the snippet to speed up performance
     fs.ensureDirSync(path.dirname(`${mainDir}/${snippet.name}`))
     fs.writeFileSync(`${mainDir}/${snippet.name}`, snippet.content)
     console.log(`Generated ${mainDir}/${snippet.name}`)
