@@ -12,7 +12,7 @@ Application('Little Webshop')
                 mkAttribute('Description', 'TEXT'),
                 mkAttribute('Price', 'FLOAT'),
             )
-            .addPermission('create', 'admin')
+            //.addPermission('create', 'admin')
             .addPermission('update', 'admin')
             .addPermission('delete', 'admin'),
         mkModel('customer', { can_login: true })
@@ -79,7 +79,9 @@ Application('Little Webshop')
 
 /**
  * TODO:
+ * - Seeding of the database
  * - Make Application lazy
+ * - Make sure USERNAME is an unique attribute
  * - Make Login snippet, in such a way that any attribute can be used as USERNAME and PASSWORD (constraint: Entity can only have one username and password)
  * - Add contraint for permissions when only a specific user can do an opperation on a relation or entity. 
  * - Make more API snippets

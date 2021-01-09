@@ -30,7 +30,7 @@ export const AppToSnippets: Func<Application, Snippet[]> = Func(app => {
     let api_folder = `api/${app.api_version}`
 
     return [
-        { name: 'config.php', content: CreateConfig_snippet(models) },
+        { name: 'config.Example.php', content: CreateConfig_snippet(models) },
         { name: 'init.php', content: initDatabase_snippet(models, relations) }
     ]
         .concat(models.flatMap(m => ModelSnippets.flatMap(f => {

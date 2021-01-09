@@ -4,6 +4,7 @@
   "description": "A typesafe Scaffolder wich generates a PHP application based on a given data model.",
   "main": "index.js",
   "scripts": {
+    "generate": "tsc && node dist/generator.js",
     "start": "node dist/generator.js",
     "build": "tsc",
     "watch": "tsc -w",

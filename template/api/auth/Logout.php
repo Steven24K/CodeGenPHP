@@ -14,7 +14,7 @@ if (!allow_request_methods(["GET"])) {
 session_start();
 
 if (isset($_SESSION['id'])) {
-    session_abort();
+    session_destroy();
     echo json_encode(new HttpResult('Succesfully logged out', 200));
 } else {
     echo json_encode(new HttpResult('Not logged in', 200));

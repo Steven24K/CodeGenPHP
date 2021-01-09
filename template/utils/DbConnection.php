@@ -1,6 +1,4 @@
-<?php 
-
-require_once("../config.php");
+<?php
 
 
 class Database {
@@ -25,7 +23,7 @@ class Database {
 // TODO: Escape all queries before send to the database!
 
 class DbConnection {
-    private $_servername = DB_NAME;
+    private $_servername = DB_HOST;
     private $_username = DB_USER;
     private $_password = DB_PASSWORD;
     private $_dbname = DB_NAME;
@@ -38,7 +36,7 @@ class DbConnection {
 
         $this->_conn = new mysqli($this->_servername, $this->_username, $this->_password, $this->_dbname);
         if ($this->_conn->connect_error) {
-            die("Connection failed $this->_conn->connect_error");
+            die("Connection failed " . $this->_conn->connect_error);
         }
 
     }

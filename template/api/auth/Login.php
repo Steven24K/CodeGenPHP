@@ -25,10 +25,9 @@ $data = json_decode(file_get_contents("php://input"));
 if (isset($data->UserName) and isset($data->Password) and isset($data->role)) {
     if (in_array($data->role, LOGGABLE_ENTITIES)) {
 
-        
-        $encrypted_password = sodium_crypto_pwhash_scryptsalsa208sha256_str($data->Password);
-        $sql = "SELECT Id FROM $role WHERE UserName = $data->UserName and Password = $encrypted_password";
-        $result = $connection->ExecuteQuery($sql);
+        $encrypted_password = md5($data->Password);
+        $sql = "SELECT Id FROM $data->role WHERE UserName = '$data->UserName' and Password = '$encrypted_password'";
+        $result = $connection->GetQueryResult($sql);
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 session_start();
@@ -38,7 +37,7 @@ if (isset($data->UserName) and isset($data->Password) and isset($data->role)) {
             }
             echo json_encode(new HttpResult("Logged in succesfully", 200));
         } else {
-            echo json_encode(new HttpResult("Wrong credentials", 200));
+            echo json_encode(new HttpResult("Wrong credentials", 403));
         }
 
 

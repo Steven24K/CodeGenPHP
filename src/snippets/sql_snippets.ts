@@ -30,6 +30,7 @@ const RelationToQuery = (relation: Relation) => `$connection->ExecuteQuery("CREA
 export const initDatabase_snippet = (models: Model[], relations: Relation[]) => `
 <?php 
 
+require_once('config.php');
 require_once('./utils/DbConnection.php');
 
 

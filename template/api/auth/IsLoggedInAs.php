@@ -21,13 +21,13 @@ $data = json_decode(file_get_contents("php://input"));
 session_start();
 
 if (isset($data->Id) and isset($data->role) and isset($_SESSION['id']) and isset($_SESSION['role'])) {
-    if ($data->Id === $_SESSION['id'] and $data->role === $_SESSION['role']) {
+    if (strval($data->Id) === strval($_SESSION['id']) and strval($data->role) === strval($_SESSION['role'])) {
         echo json_encode(new HttpResult(TRUE, 200));
     } else {
         echo json_encode(new HttpResult(FALSE, 403));
     }
 } else {
-    echo json_encode(new HttpResult(FALSE, 403));
+    echo json_encode(new HttpResult(FALSE, 404));
 }
 
 ?>
