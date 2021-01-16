@@ -24,7 +24,12 @@ Application('Little Webshop')
             )
             .addPermission('read', 'admin', 'user')
             .addPermission('update', 'admin', 'customer')
-            .addPermission('delete', 'admin', 'customer'),
+            .addPermission('delete', 'admin', 'customer')
+            .addSeeds(
+                {UserName: "user1", Password: "test123",}, 
+                {UserName: "user2", Password: "test123",}, 
+                {UserName: "user3", Password: "test123",}, 
+            ),
         mkModel('orderinfo')
             .addAttributes(
                 mkAttribute('Amount', 'INT'),
@@ -41,7 +46,14 @@ Application('Little Webshop')
             .addPermission('create', 'admin')
             .addPermission('read', 'admin')
             .addPermission('update', 'admin')
-            .addPermission('delete', 'admin'),
+            .addPermission('delete', 'admin')
+            .addSeeds(
+                {UserName: "admin1", Password: "test123"},
+                {UserName: "admin2", Password: "test123"},
+                {UserName: "admin3", Password: "test123"},
+                {UserName: "admin4", Password: "test123"},
+                {UserName: "admin5", Password: "test123"},
+            ),
         mkModel('blog')
             .addAttributes(
                 mkAttribute('Title', 'VARCHAR', { size: 100 }),

@@ -13,4 +13,8 @@ To compile in watch mode:
 `yarn watch`
 
 Start the generator: 
-`yarn start`
+`yarn start` 
+
+or 
+
+`yarn generate` to compile and run after each other

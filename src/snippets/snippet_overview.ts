@@ -5,7 +5,7 @@ import { Func } from "../utils/Func";
 import { Pair, Snippet } from "../utils/types";
 import { CreateApiCall_snippet, CreateRelation_snippet, DeleteApiCall_snippet, DeleteRelation_snippet, GetApiCall_snippet, GetRelation_snippet, UpdateApiCall_snippet, UpdateRelation_snippet } from "./api_snippets";
 import { CreateConfig_snippet } from "./config_snippets";
-import { initDatabase_snippet } from "./sql_snippets";
+import { initDatabase_snippet, seedDatabase_snippet } from "./sql_snippets";
 
 
 
@@ -30,8 +30,9 @@ export const AppToSnippets: Func<Application, Snippet[]> = Func(app => {
     let api_folder = `api/${app.api_version}`
 
     return [
-        { name: 'config.Example.php', content: CreateConfig_snippet(models) },
-        { name: 'init.php', content: initDatabase_snippet(models, relations) }
+        CreateConfig_snippet(models),
+        initDatabase_snippet(models, relations),
+        seedDatabase_snippet(models, relations),
     ]
         .concat(models.flatMap(m => ModelSnippets.flatMap(f => {
             let snippet = f.f(m)

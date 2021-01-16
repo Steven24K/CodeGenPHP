@@ -2,6 +2,7 @@ import { Attribute } from "../Spec/Attribute"
 import { Model } from "../Spec/Model"
 import { Relation } from "../Spec/Relation"
 import { Fun } from "../utils/types"
+import { isStringLike, shouldBeEncrypted } from "../utils/utils"
 import { Permission_snippet } from "./permission_snippets"
 
 const HtmlComment = (text: string): string => `<!--${text}-->`
@@ -63,9 +64,7 @@ export const GetApiCall_snippet = (model: Model): string => {
 
 let attr_parser: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + x.name + ((attr.length - 1 != i) ? ', ' : ''), '')
 
-let isStringLike: Fun<Attribute, boolean> = a => a.type == 'TEXT' || a.type == 'CHAR' || a.type == 'LONGTEXT' || a.type == 'MEDIUMTEXT'
-    || a.type == 'PASSWORD' || a.type == 'TINYTEXT' || a.type == 'VARCHAR' || a.type == "USERNAME"
-let shouldBeEncrypted: Fun<Attribute, boolean> = a => a.type == 'PASSWORD'
+
 let attr_values: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + (shouldBeEncrypted(x) ? `" . "'" . md5($data->${x.name}) . "'" . "` : isStringLike(x) ? `'$data->${x.name}'` : `$data->${x.name}`) + ((attr.length - 1 != i) ? ', ' : ''), '')
 let attr_validation_string: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + `isset($data->${x.name})` + ((attr.length - 1 != i) ? ' and ' : ''), '')
 

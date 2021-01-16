@@ -7,11 +7,13 @@ export interface Model {
     name: string
     attributes: Map<string, Attribute>
     permissions: Permission
+    seeds: object[]
 
     can_login?: boolean
 
     addAttributes: (...attr: Attribute[]) => Model
     addPermission: (kind: keyof Permission, ...permissions: string[]) => Model
+    addSeeds: (...seeds: object[]) => Model
 }
 
 const defaultModelOptions: Required<Optional<Model>> = {
@@ -27,6 +29,7 @@ export const mkModel = (name: string, options: Optional<Model> = defaultModelOpt
         update: List(),
         delete: List()
     },
+    seeds: [],
 
     ...defaultModelOptions,
     ...options,
@@ -49,6 +52,12 @@ export const mkModel = (name: string, options: Optional<Model> = defaultModelOpt
                 ...this.permissions,
                 [kind]: this.permissions[kind].concat(permissions.reduce((xs, x) => this.permissions[kind].contains(x) ? xs : xs.concat(x), List<string>()))
             }
+        })
+    },
+
+    addSeeds: function (...seeds: object[]): Model {
+        return ({
+            ...this, seeds: this.seeds.concat(seeds)
         })
     }
 })
