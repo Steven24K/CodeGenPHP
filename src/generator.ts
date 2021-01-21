@@ -14,7 +14,8 @@ Application('Little Webshop')
             )
             //.addPermission('create', 'admin')
             .addPermission('update', 'admin')
-            .addPermission('delete', 'admin'),
+            .addPermission('delete', 'admin')
+            .seedRandom(10),
         mkModel('customer', { can_login: true })
             .addAttributes(
                 mkAttribute('Email', 'USERNAME'),

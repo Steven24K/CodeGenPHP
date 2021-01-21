@@ -1,16 +1,12 @@
 import * as fs from "fs-extra"
 import { Map } from "immutable"
 import * as path from "path"
-import { CreateApiCall_snippet, CreateRelation_snippet, DeleteApiCall_snippet, DeleteRelation_snippet, GetApiCall_snippet, GetRelation_snippet, UpdateApiCall_snippet, UpdateRelation_snippet } from "../snippets/api_snippets"
-import { CreateConfig_snippet } from "../snippets/config_snippets"
-import { initDatabase_snippet } from "../snippets/sql_snippets"
 import { AppToSnippets } from "../snippets/snippet_overview"
 import { walk_dir, WriteToFile } from "../utils/FileWritng"
 import { Optional } from "../utils/types"
 import { Model } from "./Model"
 import { Permission } from "./Permission"
 import { Relation } from "./Relation"
-import { Func } from "../utils/Func"
 
 export interface Application {
     projectName: string

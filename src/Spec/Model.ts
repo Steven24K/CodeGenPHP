@@ -1,5 +1,6 @@
 import { List, Map } from "immutable"
-import { Optional } from "../utils/types"
+import { Fun, Optional } from "../utils/types"
+import { mk_random_attr_value } from "../utils/utils"
 import { Attribute } from "./Attribute"
 import { Permission } from "./Permission"
 
@@ -14,6 +15,7 @@ export interface Model {
     addAttributes: (...attr: Attribute[]) => Model
     addPermission: (kind: keyof Permission, ...permissions: string[]) => Model
     addSeeds: (...seeds: object[]) => Model
+    seedRandom: (n: number) => Model
 }
 
 const defaultModelOptions: Required<Optional<Model>> = {
@@ -56,6 +58,21 @@ export const mkModel = (name: string, options: Optional<Model> = defaultModelOpt
     },
 
     addSeeds: function (...seeds: object[]): Model {
+        return ({
+            ...this, seeds: this.seeds.concat(seeds)
+        })
+    },
+
+    seedRandom: function (n: number): Model {
+        let seeds: object[] = []
+        do {
+            let seed: object = this.attributes.toIndexedSeq().toArray().reduce((obj, attr) => {
+                return ({ ...obj, [attr.name]: mk_random_attr_value(attr) })
+            }, {})
+            n -= 1
+            seeds = seeds.concat(seed)
+        } while (n >= 0);
+
         return ({
             ...this, seeds: this.seeds.concat(seeds)
         })
