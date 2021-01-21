@@ -4,7 +4,7 @@ import * as path from "path"
 import { CreateApiCall_snippet, CreateRelation_snippet, DeleteApiCall_snippet, DeleteRelation_snippet, GetApiCall_snippet, GetRelation_snippet, UpdateApiCall_snippet, UpdateRelation_snippet } from "../snippets/api_snippets"
 import { CreateConfig_snippet } from "../snippets/config_snippets"
 import { initDatabase_snippet } from "../snippets/sql_snippets"
-import {AppToSnippets} from "../snippets/snippet_overview"
+import { AppToSnippets } from "../snippets/snippet_overview"
 import { walk_dir, WriteToFile } from "../utils/FileWritng"
 import { Optional } from "../utils/types"
 import { Model } from "./Model"
@@ -29,7 +29,7 @@ export interface Application {
 
 
 export const defaultAppOptions: Required<Optional<Application>> = ({
-    api_version: 'v1', 
+    api_version: 'v1',
 })
 
 export const Application = (name: string, options: Optional<Application> = defaultAppOptions): Application => ({
@@ -99,7 +99,8 @@ export const Application = (name: string, options: Optional<Application> = defau
         AppToSnippets.f(this).forEach(snippet => {
             WriteToFile(mainDir).f(snippet)
         })
-        
+
+        console.log('Done...')
     }
 
 })

@@ -4,6 +4,7 @@ import { Relation } from "../Spec/Relation";
 import { Func } from "../utils/Func";
 import { Pair, Snippet } from "../utils/types";
 import { CreateApiCall_snippet, CreateRelation_snippet, DeleteApiCall_snippet, DeleteRelation_snippet, GetApiCall_snippet, GetRelation_snippet, UpdateApiCall_snippet, UpdateRelation_snippet } from "./api_snippets";
+import { login_snippet } from "./auth_snippet";
 import { CreateConfig_snippet } from "./config_snippets";
 import { initDatabase_snippet, seedDatabase_snippet } from "./sql_snippets";
 
@@ -13,7 +14,7 @@ const ModelSnippets: Func<Model, Snippet>[] = [
     Func(m => ({ name: `${m.name}/Create.php`, content: CreateApiCall_snippet(m) })),
     Func(m => ({ name: `${m.name}/Get.php`, content: GetApiCall_snippet(m) })),
     Func(m => ({ name: `${m.name}/Update.php`, content: UpdateApiCall_snippet(m) })),
-    Func(m => ({ name: `${m.name}/Delete.php`, content: DeleteApiCall_snippet(m) }))
+    Func(m => ({ name: `${m.name}/Delete.php`, content: DeleteApiCall_snippet(m) })), 
 ]
 
 const RelationSnippets: Func<Relation, Snippet>[] = [
@@ -33,6 +34,7 @@ export const AppToSnippets: Func<Application, Snippet[]> = Func(app => {
         CreateConfig_snippet(models),
         initDatabase_snippet(models, relations),
         seedDatabase_snippet(models, relations),
+        login_snippet(models, app.api_version!),
     ]
         .concat(models.flatMap(m => ModelSnippets.flatMap(f => {
             let snippet = f.f(m)
