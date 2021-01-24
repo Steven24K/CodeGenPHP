@@ -1,7 +1,7 @@
 import { Attribute } from "../Spec/Attribute"
 import { Model } from "../Spec/Model"
 import { Relation } from "../Spec/Relation"
-import { Fun } from "../utils/types"
+import { Fun, Snippet } from "../utils/types"
 import { isStringLike, shouldBeEncrypted } from "../utils/utils"
 import { Permission_snippet } from "./permission_snippets"
 
@@ -20,7 +20,7 @@ ${code}
 
 ?>`
 
-export const GetApiCall_snippet = (model: Model): string => {
+export const GetApiCall_snippet = (model: Model): Snippet => {
     let snippet = `
     $id = $_GET["Id"];
     
@@ -44,22 +44,25 @@ export const GetApiCall_snippet = (model: Model): string => {
           echo json_encode(new HttpResult($list, 200));
     }
     `
-    return PhpCode(`
-    require_once('../../../config.php');
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${model.name}/Get.php`,
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["GET"])) {
+            die("Request not allowed");
+        }
+        
+        $connection = new DbConnection();
+        
+        ${model.permissions.read.count() == 0 ? snippet : Permission_snippet(model.permissions.read.toArray(), snippet)}
     
-    if (!allow_request_methods(["GET"])) {
-        die("Request not allowed");
-    }
-    
-    $connection = new DbConnection();
-    
-    ${model.permissions.read.count() == 0 ? snippet : Permission_snippet(model.permissions.read.toArray(), snippet)}
-
-    `)
+        `)
+    })
 }
 
 let attr_parser: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + x.name + ((attr.length - 1 != i) ? ', ' : ''), '')
@@ -68,7 +71,7 @@ let attr_parser: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs
 let attr_values: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + (shouldBeEncrypted(x) ? `" . "'" . md5($data->${x.name}) . "'" . "` : isStringLike(x) ? `'$data->${x.name}'` : `$data->${x.name}`) + ((attr.length - 1 != i) ? ', ' : ''), '')
 let attr_validation_string: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + `isset($data->${x.name})` + ((attr.length - 1 != i) ? ' and ' : ''), '')
 
-export const CreateApiCall_snippet = (model: Model) => {
+export const CreateApiCall_snippet = (model: Model): Snippet => {
     let attributes = model.attributes.toIndexedSeq().toArray()
     let snippet = `
     $data = json_decode(file_get_contents("php://input")); 
@@ -81,27 +84,78 @@ export const CreateApiCall_snippet = (model: Model) => {
     }
     `
 
-    return PhpCode(`
-    require_once('../../../config.php');
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${model.name}/Create.php`,
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["POST"])) {
+            die("Request not allowed");
+        }
+        
+        $connection = new DbConnection();
+        
+        ${model.permissions.create.count() == 0 ? snippet : Permission_snippet(model.permissions.create.toArray(), snippet)}
     
-    if (!allow_request_methods(["POST"])) {
-        die("Request not allowed");
-    }
-    
-    $connection = new DbConnection();
-    
-    ${model.permissions.create.count() == 0 ? snippet : Permission_snippet(model.permissions.create.toArray(), snippet)}
+        `)
+    })
+}
 
-    `)
+export const CreateManyApi_snippet = (model: Model): Snippet => {
+    let attributes = model.attributes.toIndexedSeq().toArray()
+    let snippet = `
+    /*
+    Format of data 
+    [
+        {Attr1: "value1"},
+        {Attr2: "value2"},
+        {Attr3: "value3"},
+        {Attr4: "value4"},
+    ]
+    */
+    $data = json_decode(file_get_contents("php://input")); 
+    
+    if (count($data) > 0) {
+        $insert_count = 0;
+        foreach ($data as $record) {
+            if (${attr_validation_string(attributes)}) {
+                $connection->ExecuteQuery("INSERT INTO ${model.name}(${attr_parser(attributes)}) VALUES (${attr_values(attributes)})");
+                $insert_count += 1;
+            } 
+        } 
+        echo json_encode(new HttpResult("Inserted '$insert_count' records", 200));
+    } else {
+        echo json_encode(new HttpResult("List is empty", 200));
+    }`
+
+    return ({
+        name: `${model.name}/CreateMany.php`,
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["POST"])) {
+            die("Request not allowed");
+        }
+        
+        $connection = new DbConnection();
+
+        ${model.permissions.create.count() == 0 ? snippet : Permission_snippet(model.permissions.create.toArray(), snippet)}
+
+        `)
+    })
 }
 
 const update_set_string: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + `${x.name} = ${isStringLike(x) ? `'$data->${x.name}'` : `$data->${x.name}`}` + (attr.length - 1 != i ? ', ' : ''), '')
 
-export const UpdateApiCall_snippet = (model: Model) => {
+export const UpdateApiCall_snippet = (model: Model): Snippet => {
     let attributes = model.attributes.toIndexedSeq().toArray()
 
     let snippet = `
@@ -121,24 +175,38 @@ export const UpdateApiCall_snippet = (model: Model) => {
     }
     `
 
-    return PhpCode(`
-    require_once('../../../config.php');
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${model.name}/Update.php`,
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["PUT"])) {
+            die("Request not allowed");
+        }
     
-    if (!allow_request_methods(["PUT"])) {
-        die("Request not allowed");
-    }
-
-    ${model.permissions.update.count() > 0 ? snippet : Permission_snippet(model.permissions.update.toArray(), snippet)}
-
-    `)
+        ${model.permissions.update.count() > 0 ? snippet : Permission_snippet(model.permissions.update.toArray(), snippet)}
+    
+        `)
+    })
 }
 
 
-export const DeleteApiCall_snippet = (model: Model) => {
+export const UpdateManyApi_snippet = (model: Model): Snippet => {
+    return ({
+        name: `${model.name}/UpdateMany.php`, 
+        content: PhpCode(`
+        // TODO: UpdateMany snippet 
+
+        echo json_encode(new HttpResult("Not implemented yet", 200));
+        `)
+    })
+}
+
+export const DeleteApiCall_snippet = (model: Model): Snippet => {
     let snippet = `
     $id = $_GET["Id"];
     
@@ -154,28 +222,43 @@ export const DeleteApiCall_snippet = (model: Model) => {
     }
     `
 
-    return PhpCode(`
-    require_once('../../../config.php');    
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${model.name}/Delete.php`,
+        content: PhpCode(`
+        require_once('../../../config.php');    
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["DELETE"])) {
+            die("Request not allowed");
+        }
+        
+        $connection = new DbConnection();
     
-    if (!allow_request_methods(["DELETE"])) {
-        die("Request not allowed");
-    }
+        ${model.permissions.delete.count() == 0 ? snippet : Permission_snippet(model.permissions.delete.toArray(), snippet)}
     
-    $connection = new DbConnection();
+        `)
+    })
+}
 
-    ${model.permissions.delete.count() == 0 ? snippet : Permission_snippet(model.permissions.delete.toArray(), snippet)}
 
-    `)
+export const DeleteManyApi_snippet = (model: Model): Snippet => {
+    return ({
+        name: `${model.name}/DeleteMany.php`, 
+        content: PhpCode(`
+        // TODO: DeleteMany snippet 
+
+        echo json_encode(new HttpResult("Not implemented yet", 200));
+        `)
+    })
 }
 
 
 const choose_primary_key = (relation: Relation) => relation.sort == 'N-N' ? 'Id' : `${relation.target}Id`
 
-export const GetRelation_snippet = (relation: Relation) => {
+export const GetRelation_snippet = (relation: Relation): Snippet => {
     let snippet = `
     $id = $_GET["${choose_primary_key(relation)}"];
     
@@ -200,24 +283,72 @@ export const GetRelation_snippet = (relation: Relation) => {
     }
     `
 
-    return PhpCode(`
-    require_once('../../../config.php');
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${relation.source}_${relation.target}/Get.php`,
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["GET"])) {
+            die("Request not allowed");
+        }
+        
+        $connection = new DbConnection();
     
-    if (!allow_request_methods(["GET"])) {
-        die("Request not allowed");
-    }
-    
-    $connection = new DbConnection();
-
-    ${relation.permissions.read.count() == 0 ? snippet : Permission_snippet(relation.permissions.read.toArray(), snippet)}
-    `)
+        ${relation.permissions.read.count() == 0 ? snippet : Permission_snippet(relation.permissions.read.toArray(), snippet)}
+        `)
+    })
 }
 
-export const CreateRelation_snippet = (relation: Relation) => {
+export const GetEntityWithRelation_snippet = (relation: Relation): Snippet => {
+    let snippet = `
+    $id = $_GET["Id"];
+    
+    if (isset($id) and $id !== "") {
+        $result = $connection->GetQueryResult("SELECT * FROM ${relation.source} JOIN ${relation.source}_${relation.target} ON ${relation.source}_${relation.target}.${relation.source}Id = ${relation.source}.Id JOIN ${relation.target} ON ${relation.target}.Id = ${relation.source}_${relation.target}.${relation.target}Id WHERE Id = $id");
+        $data = $result->fetch_assoc();
+        if (count($data) === 0) {
+            echo json_encode(new HttpResult([], 404));
+        } else {
+            echo json_encode(new HttpResult($data[0], 200));
+        }
+    } else {
+        $result = $connection->GetQueryResult("SELECT * FROM ${relation.source} JOIN ${relation.source}_${relation.target} ON ${relation.source}_${relation.target}.${relation.source}Id = ${relation.source}.Id JOIN ${relation.target} ON ${relation.target}.Id = ${relation.source}_${relation.target}.${relation.target}Id");
+        $list = array();
+        if ($result->num_rows > 0) {
+            // output data of each row
+            while($row = $result->fetch_assoc()) {
+              array_push($list, $row);
+            }
+          } 
+          echo json_encode(new HttpResult($list, 200));
+    }
+    `
+
+    return ({
+        name: `${relation.source}_${relation.target}/Get${relation.source}With${relation.target}s.php`,
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["GET"])) {
+            die("Request not allowed");
+        }
+        
+        $connection = new DbConnection();
+    
+        ${relation.permissions.read.count() == 0 ? snippet : Permission_snippet(relation.permissions.read.toArray(), snippet)}
+        `)
+    })
+}
+
+export const CreateRelation_snippet = (relation: Relation): Snippet => {
     let snippet = `
     $data = json_decode(file_get_contents("php://input")); 
    
@@ -228,25 +359,68 @@ export const CreateRelation_snippet = (relation: Relation) => {
         echo json_encode(new HttpResult(-1, 402));
     }
     `
-    return PhpCode(`
-    require_once('../../../config.php');
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${relation.source}_${relation.target}/Create.php`, 
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["POST"])) {
+            die("Request not allowed");
+        }
     
-    if (!allow_request_methods(["POST"])) {
-        die("Request not allowed");
-    }
-
-    $connection = new DbConnection();
-
-    ${relation.permissions.create.count() == 0 ? snippet : Permission_snippet(relation.permissions.create.toArray(), snippet)}
+        $connection = new DbConnection();
     
-    `)
+        ${relation.permissions.create.count() == 0 ? snippet : Permission_snippet(relation.permissions.create.toArray(), snippet)}
+        
+        `)
+    })
 }
 
-export const UpdateRelation_snippet = (relation: Relation) => {
+export const CreateManyRelations_snippet = (relation: Relation): Snippet => {
+    let snippet = `
+    $data = json_decode(file_get_contents("php://input")); 
+
+    if (count($data) > 0) {
+        $insert_count = 0;
+        foreach ($data as $record) {
+            if (isset($data->${relation.source}Id) and isset($data->${relation.target}Id)) {
+                $connection->ExecuteQuery("INSERT INTO ${relation.source}_${relation.target}(${relation.source}Id, ${relation.target}Id) VALUES ($data->${relation.source}Id, $data->${relation.target}Id)");
+                $insert_count += 1;
+            } 
+        } 
+        echo json_encode(new HttpResult("Inserted '$insert_count' records", 200));
+    } else {
+        echo json_encode(new HttpResult("List is empty", 200));
+    }
+    `
+    return ({
+        name: `${relation.source}_${relation.target}/CreateMany.php`, 
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["POST"])) {
+            die("Request not allowed");
+        }
+    
+        $connection = new DbConnection();
+    
+        ${relation.permissions.create.count() == 0 ? snippet : Permission_snippet(relation.permissions.create.toArray(), snippet)}
+        
+        `)
+    })
+}
+
+
+
+export const UpdateRelation_snippet = (relation: Relation): Snippet => {
     let snippet = `
     if (${relation.sort == 'N-N' ? 'isset($data->Id) and' : ''} isset($data->${relation.source}Id) and isset($data->${relation.target}Id)) {
         $result = $connection->ExecuteQuery("UPDATE ${relation.source}_${relation.target} SET ${relation.source}Id = $data->${relation.source}Id, ${relation.target}Id = $data->${relation.target}Id WHERE ${choose_primary_key(relation)} = $data->${choose_primary_key(relation)}");
@@ -261,26 +435,40 @@ export const UpdateRelation_snippet = (relation: Relation) => {
     }
     `
 
-    return PhpCode(`
-    require_once('../../../config.php');
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${relation.source}_${relation.target}/Update.php`, 
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["PUT"])) {
+            die("Request not allowed");
+        }
+        
+        $data = json_decode(file_get_contents("php://input")); 
+        $connection = new DbConnection();
     
-    if (!allow_request_methods(["PUT"])) {
-        die("Request not allowed");
-    }
+        ${relation.permissions.update.count() == 0 ? snippet : Permission_snippet(relation.permissions.update.toArray(), snippet)}
     
-    $data = json_decode(file_get_contents("php://input")); 
-    $connection = new DbConnection();
-
-    ${relation.permissions.update.count() == 0 ? snippet : Permission_snippet(relation.permissions.update.toArray(), snippet)}
-
-    `)
+        `)
+    })
 }
 
-export const DeleteRelation_snippet = (relation: Relation) => {
+export const UpdateManyRelations_snippet = (relation: Relation): Snippet => {
+    return ({
+        name: `${relation.source}_${relation.target}/UpdateMany.php`, 
+        content: PhpCode(`
+        // TODO: UpdateMany snippet 
+
+        echo json_encode(new HttpResult("Not implemented yet", 200));
+        `)
+    })
+}
+
+export const DeleteRelation_snippet = (relation: Relation): Snippet => {
     let snippet = `
     $id = $_GET["${choose_primary_key(relation)}"];
     
@@ -296,31 +484,34 @@ export const DeleteRelation_snippet = (relation: Relation) => {
     }
     `
 
-    return PhpCode(`
-    require_once('../../../config.php');
-    require_once('../../../utils/DefaultHeaders.php');
-    require_once('../../../utils/DbConnection.php');
-    require_once('../../../utils/HttpResult.php');
-    require_once('../../../utils/utils.php');
+    return ({
+        name: `${relation.source}_${relation.target}/Delete.php`, 
+        content: PhpCode(`
+        require_once('../../../config.php');
+        require_once('../../../utils/DefaultHeaders.php');
+        require_once('../../../utils/DbConnection.php');
+        require_once('../../../utils/HttpResult.php');
+        require_once('../../../utils/utils.php');
+        
+        if (!allow_request_methods(["DELETE"])) {
+            die("Request not allowed");
+        }
+        
+        $connection = new DbConnection();
     
-    if (!allow_request_methods(["DELETE"])) {
-        die("Request not allowed");
-    }
-    
-    $connection = new DbConnection();
-
-    ${relation.permissions.delete.count() == 0 ? snippet : Permission_snippet(relation.permissions.delete.toArray(), snippet)}
-    
-    `)
+        ${relation.permissions.delete.count() == 0 ? snippet : Permission_snippet(relation.permissions.delete.toArray(), snippet)}
+        
+        `)
+    })
 }
 
-/**
- * TODO: New snippets 
- * 
- * For enitity opperations: 
- * - CreateMany 
- * - GetWith[Relation]
- * - UpdateMany
- * - DeleteWithRelation (maybe include this in the delete on default) 
- * - DeleteMany
- */
+export const DeleteManyRelations_snippet = (relation: Relation): Snippet => {
+    return ({
+        name: `${relation.source}_${relation.target}/DeleteMany.php`, 
+        content: PhpCode(`
+        // TODO: DeleteMany snippet 
+
+        echo json_encode(new HttpResult("Not implemented yet", 200));
+        `)
+    })
+}
