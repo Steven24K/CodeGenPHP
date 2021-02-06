@@ -87,7 +87,7 @@ export const Application = (name: string, options: Optional<Application> = defau
                 fs.writeFileSync(new_file, content)
             }
 
-            console.log(`Generated ${new_file}`)
+            console.log(`Copied content to ${new_file}`)
 
         })
 

@@ -23,7 +23,10 @@ const login_switch_body = (model: Model): string => {
                     $_SESSION['role'] = $data->role;
                     break;
                 }
-                echo json_encode(new HttpResult("Logged in succesfully", 200));
+                echo json_encode(new HttpResult("Logged in succesfully", array(
+                    "id" -> $_SESSION["id"],
+                    "role" -> $_SESSION["role"]
+                )));
             } else {
                 echo json_encode(new HttpResult("Wrong credentials", 403));
             }
