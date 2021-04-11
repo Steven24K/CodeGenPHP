@@ -6,6 +6,7 @@ import { Snippet } from "../utils/types";
 import { CreateApiCall_snippet, CreateManyApi_snippet, CreateManyRelations_snippet, CreateRelation_snippet, DeleteApiCall_snippet, DeleteManyApi_snippet, DeleteManyRelations_snippet, DeleteRelation_snippet, GetApiCall_snippet, GetEntityWithRelation_snippet, GetRelation_snippet, UpdateApiCall_snippet, UpdateManyApi_snippet, UpdateManyRelations_snippet, UpdateRelation_snippet } from "./api_snippets";
 import { login_snippet } from "./auth_snippet";
 import { CreateConfig_snippet } from "./config_snippets";
+import { getEntitiesBasedOnRole_snippet } from "./permission_snippets";
 import { initDatabase_snippet, seedDatabase_snippet } from "./sql_snippets";
 
 
@@ -42,6 +43,7 @@ export const AppToSnippets: Func<Application, Snippet[]> = Func(app => {
         initDatabase_snippet(models, relations),
         seedDatabase_snippet(models, relations),
         login_snippet(models, app.api_version!),
+        getEntitiesBasedOnRole_snippet(models),
     ]
         .concat(models.flatMap(m => ModelSnippets.flatMap(f => {
             let snippet = f.f(m)
