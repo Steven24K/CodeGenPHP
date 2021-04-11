@@ -23,12 +23,12 @@ const login_switch_body = (model: Model): string => {
                     $_SESSION['role'] = $data->role;
                     break;
                 }
-                echo json_encode(new HttpResult("Logged in succesfully", array(
+                echo json_encode(new HttpResult(array(
                     "id" => $_SESSION["id"],
                     "role" => $_SESSION["role"]
-                )));
+                ), 200));
             } else {
-                echo json_encode(new HttpResult("Wrong credentials", 403));
+                echo json_encode(new HttpResult("Wrong credentials", 201));
             }
         } else {
             echo json_encode(new HttpResult("Incomplete request", 201));
@@ -77,10 +77,10 @@ if (isset($data->role)) {
         }
 
     } else {
-        echo json_encode(new HttpResult("Role: " . $data->role . " does not exists", 200));
+        echo json_encode(new HttpResult("Role: " . $data->role . " does not exists", 201));
     }
 } else {
-    echo json_encode(new HttpResult("Not all fields are filled in correctly", 203));
+    echo json_encode(new HttpResult("Not all fields are filled in correctly", 201));
 }
         `)
     })
