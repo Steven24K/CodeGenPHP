@@ -1,3 +1,4 @@
+import { Application } from "../Spec/Application";
 import { Model } from "../Spec/Model";
 import { Snippet } from "../utils/types";
 
@@ -26,5 +27,19 @@ export const CreateConfig_snippet = (models: Model[]): Snippet => {
         
         ?>
         `
+    })
+}
+
+export const frontend_constants_snippets = (app: Application): Snippet => {
+    return ({
+        name: 'src/constants.ts', 
+        content: `export const ENV: 'DEV' | 'PROD' = 'DEV'
+
+
+        export const ORIGIN = ENV == 'DEV' ? 'http://localhost:8080' : '${app.domain}'
+        
+        export const API_VERSION = 'v1'
+        
+        export const SITE_NAME = "${app.projectName}"`
     })
 }

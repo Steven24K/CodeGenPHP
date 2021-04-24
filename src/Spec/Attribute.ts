@@ -2,7 +2,7 @@ import { Optional } from "../utils/types"
 
 export type AttributeType = 'TEXT' | "BOOLEAN" | "INT" | "FLOAT" | "TINYBLOB" | "TINYTEXT" | "MEDIUMTEXT" | "MEDIUMBLOB" | "LONGTEXT" | "LONGBLOB"
     | "VARCHAR" | "CHAR" | "BINARY" | "VARBINARY"
-    | "ENUM" | "SET"
+    // | "ENUM" | "SET"
     | "PASSWORD" | "USERNAME"
 
 // https://www.w3schools.com/sql/sql_datatypes.asp

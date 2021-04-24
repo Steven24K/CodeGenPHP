@@ -1,3 +1,4 @@
+import { Application } from "../Spec/Application"
 import { Model } from "../Spec/Model"
 import { Snippet } from "../utils/types"
 import { PhpCode } from "./api_snippets"
@@ -25,8 +26,8 @@ case '${case_name}':
     return ${returns.length > 0 ? returns.reduce((xs, x, i) => xs + `$role === '${x}'${returns.length - 1 == i ? '' : ' or '}`, '') : 'true'};
 `
 
-export const getEntitiesBasedOnRole_snippet = (models: Model[]): Snippet => ({
-    name: '/extras/getEntitiesBasedOnRole.php',
+export const getEntitiesBasedOnRole_snippet = (app: Application) => (models: Model[]): Snippet => ({
+    name: `api/${app.api_version}/extras/getEntitiesBasedOnRole.php`,
     content: PhpCode(`
     require_once('../../../utils/DefaultHeaders.php');
 require_once('../../../utils/DbConnection.php');

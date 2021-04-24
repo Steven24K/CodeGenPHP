@@ -1,3 +1,4 @@
+import { Application } from "../Spec/Application"
 import { Attribute } from "../Spec/Attribute"
 import { Model } from "../Spec/Model"
 import { Relation } from "../Spec/Relation"
@@ -20,7 +21,7 @@ ${code}
 
 ?>`
 
-export const GetApiCall_snippet = (model: Model): Snippet => {
+export const GetApiCall_snippet = (app: Application) => (model: Model): Snippet => {
     let snippet = `
     $id = $_GET["Id"];
     
@@ -45,7 +46,7 @@ export const GetApiCall_snippet = (model: Model): Snippet => {
     }
     `
     return ({
-        name: `${model.name}/Get.php`,
+        name: `api/${app.api_version}/${model.name}/Get.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -71,7 +72,7 @@ let attr_parser: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs
 let attr_values: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + (shouldBeEncrypted(x) ? `" . "'" . md5($data->${x.name}) . "'" . "` : isStringLike(x) ? `'$data->${x.name}'` : `$data->${x.name}`) + ((attr.length - 1 != i) ? ', ' : ''), '')
 let attr_validation_string: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + `isset($data->${x.name})` + ((attr.length - 1 != i) ? ' and ' : ''), '')
 
-export const CreateApiCall_snippet = (model: Model): Snippet => {
+export const CreateApiCall_snippet = (app: Application) => (model: Model): Snippet => {
     let attributes = model.attributes.toIndexedSeq().toArray()
     let snippet = `
     $data = json_decode(file_get_contents("php://input")); 
@@ -85,7 +86,7 @@ export const CreateApiCall_snippet = (model: Model): Snippet => {
     `
 
     return ({
-        name: `${model.name}/Create.php`,
+        name: `api/${app.api_version}/${model.name}/Create.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -105,7 +106,7 @@ export const CreateApiCall_snippet = (model: Model): Snippet => {
     })
 }
 
-export const CreateManyApi_snippet = (model: Model): Snippet => {
+export const CreateManyApi_snippet = (app: Application) => (model: Model): Snippet => {
     let attributes = model.attributes.toIndexedSeq().toArray()
     let snippet = `
     /*
@@ -133,7 +134,7 @@ export const CreateManyApi_snippet = (model: Model): Snippet => {
     }`
 
     return ({
-        name: `${model.name}/CreateMany.php`,
+        name: `api/${app.api_version}/${model.name}/CreateMany.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -155,7 +156,7 @@ export const CreateManyApi_snippet = (model: Model): Snippet => {
 
 const update_set_string: Fun<Attribute[], string> = attr => attr.reduce((xs, x, i) => xs + `${x.name} = ${isStringLike(x) ? `'$data->${x.name}'` : `$data->${x.name}`}` + (attr.length - 1 != i ? ', ' : ''), '')
 
-export const UpdateApiCall_snippet = (model: Model): Snippet => {
+export const UpdateApiCall_snippet = (app: Application) => (model: Model): Snippet => {
     let attributes = model.attributes.toIndexedSeq().toArray()
 
     let snippet = `
@@ -176,7 +177,7 @@ export const UpdateApiCall_snippet = (model: Model): Snippet => {
     `
 
     return ({
-        name: `${model.name}/Update.php`,
+        name: `api/${app.api_version}/${model.name}/Update.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -195,9 +196,9 @@ export const UpdateApiCall_snippet = (model: Model): Snippet => {
 }
 
 
-export const UpdateManyApi_snippet = (model: Model): Snippet => {
+export const UpdateManyApi_snippet = (app: Application) => (model: Model): Snippet => {
     return ({
-        name: `${model.name}/UpdateMany.php`, 
+        name: `api/${app.api_version}/${model.name}/UpdateMany.php`,
         content: PhpCode(`
         // TODO: UpdateMany snippet 
 
@@ -206,7 +207,7 @@ export const UpdateManyApi_snippet = (model: Model): Snippet => {
     })
 }
 
-export const DeleteApiCall_snippet = (model: Model): Snippet => {
+export const DeleteApiCall_snippet = (app: Application) => (model: Model): Snippet => {
     let snippet = `
     $id = $_GET["Id"];
     
@@ -223,7 +224,7 @@ export const DeleteApiCall_snippet = (model: Model): Snippet => {
     `
 
     return ({
-        name: `${model.name}/Delete.php`,
+        name: `api/${app.api_version}/${model.name}/Delete.php`,
         content: PhpCode(`
         require_once('../../../config.php');    
         require_once('../../../utils/DefaultHeaders.php');
@@ -244,9 +245,9 @@ export const DeleteApiCall_snippet = (model: Model): Snippet => {
 }
 
 
-export const DeleteManyApi_snippet = (model: Model): Snippet => {
+export const DeleteManyApi_snippet = (app: Application) => (model: Model): Snippet => {
     return ({
-        name: `${model.name}/DeleteMany.php`, 
+        name: `api/${app.api_version}/${model.name}/DeleteMany.php`,
         content: PhpCode(`
         // TODO: DeleteMany snippet 
 
@@ -258,7 +259,7 @@ export const DeleteManyApi_snippet = (model: Model): Snippet => {
 
 const choose_primary_key = (relation: Relation) => relation.sort == 'N-N' ? 'Id' : `${relation.target}Id`
 
-export const GetRelation_snippet = (relation: Relation): Snippet => {
+export const GetRelation_snippet = (app: Application) => (relation: Relation): Snippet => {
     let snippet = `
     $id = $_GET["${choose_primary_key(relation)}"];
     
@@ -284,7 +285,7 @@ export const GetRelation_snippet = (relation: Relation): Snippet => {
     `
 
     return ({
-        name: `${relation.source}_${relation.target}/Get.php`,
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/Get.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -303,7 +304,7 @@ export const GetRelation_snippet = (relation: Relation): Snippet => {
     })
 }
 
-export const GetEntityWithRelation_snippet = (relation: Relation): Snippet => {
+export const GetEntityWithRelation_snippet = (app: Application) => (relation: Relation): Snippet => {
     let snippet = `
     $id = $_GET["Id"];
     
@@ -329,7 +330,7 @@ export const GetEntityWithRelation_snippet = (relation: Relation): Snippet => {
     `
 
     return ({
-        name: `${relation.source}_${relation.target}/Get${relation.source}With${relation.target}s.php`,
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/Get${relation.source}With${relation.target}s.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -348,7 +349,7 @@ export const GetEntityWithRelation_snippet = (relation: Relation): Snippet => {
     })
 }
 
-export const CreateRelation_snippet = (relation: Relation): Snippet => {
+export const CreateRelation_snippet = (app: Application) => (relation: Relation): Snippet => {
     let snippet = `
     $data = json_decode(file_get_contents("php://input")); 
    
@@ -360,7 +361,7 @@ export const CreateRelation_snippet = (relation: Relation): Snippet => {
     }
     `
     return ({
-        name: `${relation.source}_${relation.target}/Create.php`, 
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/Create.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -380,7 +381,7 @@ export const CreateRelation_snippet = (relation: Relation): Snippet => {
     })
 }
 
-export const CreateManyRelations_snippet = (relation: Relation): Snippet => {
+export const CreateManyRelations_snippet = (app: Application) => (relation: Relation): Snippet => {
     let snippet = `
     $data = json_decode(file_get_contents("php://input")); 
 
@@ -398,7 +399,7 @@ export const CreateManyRelations_snippet = (relation: Relation): Snippet => {
     }
     `
     return ({
-        name: `${relation.source}_${relation.target}/CreateMany.php`, 
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/CreateMany.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -420,7 +421,7 @@ export const CreateManyRelations_snippet = (relation: Relation): Snippet => {
 
 
 
-export const UpdateRelation_snippet = (relation: Relation): Snippet => {
+export const UpdateRelation_snippet = (app: Application) => (relation: Relation): Snippet => {
     let snippet = `
     if (${relation.sort == 'N-N' ? 'isset($data->Id) and' : ''} isset($data->${relation.source}Id) and isset($data->${relation.target}Id)) {
         $result = $connection->ExecuteQuery("UPDATE ${relation.source}_${relation.target} SET ${relation.source}Id = $data->${relation.source}Id, ${relation.target}Id = $data->${relation.target}Id WHERE ${choose_primary_key(relation)} = $data->${choose_primary_key(relation)}");
@@ -436,7 +437,7 @@ export const UpdateRelation_snippet = (relation: Relation): Snippet => {
     `
 
     return ({
-        name: `${relation.source}_${relation.target}/Update.php`, 
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/Update.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -457,9 +458,9 @@ export const UpdateRelation_snippet = (relation: Relation): Snippet => {
     })
 }
 
-export const UpdateManyRelations_snippet = (relation: Relation): Snippet => {
+export const UpdateManyRelations_snippet = (app: Application) => (relation: Relation): Snippet => {
     return ({
-        name: `${relation.source}_${relation.target}/UpdateMany.php`, 
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/UpdateMany.php`,
         content: PhpCode(`
         // TODO: UpdateMany snippet 
 
@@ -468,7 +469,7 @@ export const UpdateManyRelations_snippet = (relation: Relation): Snippet => {
     })
 }
 
-export const DeleteRelation_snippet = (relation: Relation): Snippet => {
+export const DeleteRelation_snippet = (app: Application) => (relation: Relation): Snippet => {
     let snippet = `
     $id = $_GET["${choose_primary_key(relation)}"];
     
@@ -485,7 +486,7 @@ export const DeleteRelation_snippet = (relation: Relation): Snippet => {
     `
 
     return ({
-        name: `${relation.source}_${relation.target}/Delete.php`, 
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/Delete.php`,
         content: PhpCode(`
         require_once('../../../config.php');
         require_once('../../../utils/DefaultHeaders.php');
@@ -505,9 +506,9 @@ export const DeleteRelation_snippet = (relation: Relation): Snippet => {
     })
 }
 
-export const DeleteManyRelations_snippet = (relation: Relation): Snippet => {
+export const DeleteManyRelations_snippet = (app: Application) => (relation: Relation): Snippet => {
     return ({
-        name: `${relation.source}_${relation.target}/DeleteMany.php`, 
+        name: `api/${app.api_version}/${relation.source}_${relation.target}/DeleteMany.php`,
         content: PhpCode(`
         // TODO: DeleteMany snippet 
 

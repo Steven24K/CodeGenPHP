@@ -15,6 +15,7 @@ export interface Application {
     model_permissions: Map<string, Permission>
 
     api_version?: string
+    domain?: string
 
     addModels: (...models: Model[]) => Application
     addRelations: (...relations: Relation[]) => Application
@@ -26,6 +27,7 @@ export interface Application {
 
 export const defaultAppOptions: Required<Optional<Application>> = ({
     api_version: 'v1',
+    domain: 'https://stevenkoerts.nl'
 })
 
 export const Application = (name: string, options: Optional<Application> = defaultAppOptions): Application => ({

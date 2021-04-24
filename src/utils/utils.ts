@@ -1,5 +1,5 @@
 import { Chance } from "chance"
-import { Attribute } from "../Spec/Attribute"
+import { Attribute, AttributeType } from "../Spec/Attribute"
 import { Fun } from "./types"
 
 
@@ -15,4 +15,12 @@ export let mk_random_attr_value: Fun<Attribute, string | number | boolean | null
     attr.type == 'INT' ? chance.integer({min: 0, max: 2000}) : 
     attr.type == 'FLOAT' ? chance.floating({min: 0, max: 2000}) : 
     attr.type == 'BINARY' ? chance.integer({max: 1, min: 0}) : null
+}
+
+
+export const SqlType_to_typescript_type = (t: AttributeType): 'number' | 'string' | 'boolean' => {
+    if (t == 'TEXT' || t == 'CHAR' || t == 'LONGTEXT' || t == 'MEDIUMTEXT'
+    || t == 'PASSWORD' || t == 'TINYTEXT' || t == 'VARCHAR' || t == "USERNAME") return 'string' 
+    if (t == 'INT' || t == 'FLOAT' || t == 'BINARY') return 'number'
+    return 'boolean'
 }

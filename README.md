@@ -12,9 +12,9 @@ After cloning run:
 To compile in watch mode: 
 `yarn watch`
 
-Start the generator: 
+Start the generator (without compiling): 
 `yarn start` 
 
 or 
 
-`yarn generate` to compile and run after each other
+`yarn generate` to compile the latest Typescript files and run the generator.
