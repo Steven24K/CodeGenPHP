@@ -2,9 +2,10 @@ import { Chance } from "chance"
 import { Attribute, AttributeType } from "../Spec/Attribute"
 import { Fun } from "./types"
 
+let isStringLike_AUX: Fun<AttributeType, boolean> = a =>  a == 'TEXT' || a == 'CHAR' || a == 'LONGTEXT' || a == 'MEDIUMTEXT'
+|| a == 'PASSWORD' || a == 'TINYTEXT' || a == 'VARCHAR' || a == "USERNAME"
 
-export let isStringLike: Fun<Attribute, boolean> = a => a.type == 'TEXT' || a.type == 'CHAR' || a.type == 'LONGTEXT' || a.type == 'MEDIUMTEXT'
-    || a.type == 'PASSWORD' || a.type == 'TINYTEXT' || a.type == 'VARCHAR' || a.type == "USERNAME"
+export let isStringLike: Fun<Attribute, boolean> = a => isStringLike_AUX(a.type)
 
 export let shouldBeEncrypted: Fun<Attribute, boolean> = a => a.type == 'PASSWORD'
 
@@ -19,8 +20,13 @@ export let mk_random_attr_value: Fun<Attribute, string | number | boolean | null
 
 
 export const SqlType_to_typescript_type = (t: AttributeType): 'number' | 'string' | 'boolean' => {
-    if (t == 'TEXT' || t == 'CHAR' || t == 'LONGTEXT' || t == 'MEDIUMTEXT'
-    || t == 'PASSWORD' || t == 'TINYTEXT' || t == 'VARCHAR' || t == "USERNAME") return 'string' 
+    if (isStringLike_AUX(t)) return 'string' 
     if (t == 'INT' || t == 'FLOAT' || t == 'BINARY') return 'number'
     return 'boolean'
+}
+
+export const type_to_default_value = (t: AttributeType): string => {
+    if (isStringLike_AUX(t)) return '""'
+    if (t == 'INT' || t == 'FLOAT' || t == 'BINARY') return '0'
+    return 'false'
 }
