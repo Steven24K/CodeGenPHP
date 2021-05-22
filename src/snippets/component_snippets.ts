@@ -126,3 +126,187 @@ export const loginUtils_snippet = (app: Application): Snippet => {
         }`
     })
 }
+
+export const detailPage_snippet = (app: Application): Snippet => {
+    let models = app.models.toIndexedSeq().toArray()
+
+    return {
+        name: 'src/components/shared/DetailPage/DetailPage.tsx', 
+        content: `
+        import * as React from "react"
+import { NavLink } from "react-router-dom"
+import { IAppState } from "../../../AppState"
+import { loadingAsyncState } from "../../../utils"
+import { AsyncLoader } from "../AsyncLoader"
+
+${models.reduce((xs, x) => xs + `
+import { ${x.name} } from "../../../models/${x.name}"
+import { setCurrent${x.name} } from "../../Admin/AdminData"
+import { get${x.name}ById } from "../../${x.name}/${x.name}.api"
+import { Detail${x.name} } from "../../${x.name}/Detail${x.name}"
+`, "")}
+
+
+interface DetailPageProps extends IAppState {
+
+}
+
+export const DetailPage = (props: DetailPageProps) => {
+    if (props.appState.page.kind != 'admin') return null 
+
+    return <div>
+        <div>
+            {
+                props.route.match.params.id &&
+                <NavLink className="btn btn-primary" to={"/admin/" + props.appState.page.entityData.kind + "/edit/" + props.route.match.params.id}>Edit {props.appState.page.entityData.kind}</NavLink>
+            }
+        </div>
+        <PageSwitcher {...props} />
+    </div>
+}
+
+
+
+const PageSwitcher = (props: DetailPageProps) => {
+    if (props.appState.page.kind != 'admin') return null
+
+    ${models.reduce((xs, x) => xs + `
+    if (props.appState.page.entityData.kind == '${x.name}' && props.route.match.params.id && !isNaN(Number(props.route.match.params.id))) {
+        if (props.appState.page.entityData.current${x.name}.data.kind == 'unloaded') {
+            props.setState(setCurrent${x.name}(loadingAsyncState(() => get${x.name}ById(Number(props.route.match.params.id)))))
+        }
+        return <AsyncLoader<${x.name}> async={props.appState.page.entityData.current${x.name}.data}
+            onLoad={res => props.setState(setCurrent${x.name}(res))}>
+            <Detail${x.name} {...props} />
+        </AsyncLoader>
+    }
+    `, "")}
+
+
+    return <div>
+        <h1>Detail page does not exist</h1>
+    </div>
+}
+        `
+    }
+}
+
+
+export const dataTable_snippet = (app: Application): Snippet => {
+    let models = app.models.toIndexedSeq().toArray()
+
+    return {
+        name: 'src/components/shared/DataTable/DataTable.tsx', 
+        content: `
+        import * as React from "react"
+        import { loadingAsyncState } from "../../../utils"
+import { IAppState } from "../../../AppState"
+import { Loader } from "../Loader"
+import { AsyncLoader } from "../AsyncLoader"
+
+${models.reduce((xs, x) => xs + `
+import { ${x.name} } from "../../../models/${x.name}"
+import { get_${x.name}s } from "../../${x.name}/${x.name}.api"
+import { Table${x.name} } from "../../${x.name}/Table${x.name}"
+`, "")}
+
+import { ${models.reduce((xs, x) => xs + `set_${x.name}s, ` ,"")} } from "../../Admin/AdminData"
+import './DataTable.css'
+
+interface DataTableProps extends IAppState {
+}
+
+
+export const DataTable = (props: DataTableProps) => {
+    if (props.appState.page.kind != 'admin') return <div></div>
+
+    return <div className="card mb-4">
+        <div className="card-header">
+            <i className="fas fa-table mr-1"></i>
+            {props.appState.page.entityData.kind}
+        </div>
+        <div className="card-body">
+            <div className="table-responsive">
+                <TableRenderer {...props} />
+            </div>
+        </div>
+    </div>
+}
+
+
+const TableRenderer = (props: DataTableProps) => {
+    if (props.appState.page.kind != 'admin') return <div></div>
+
+
+    ${models.reduce((xs, x) => xs + `
+    if (props.appState.page.entityData.kind == '${x.name}') {
+        if (props.appState.page.entityData.${x.name}s.kind == 'unloaded') {
+            props.setState(set_${x.name}s(loadingAsyncState(() => get_${x.name}s())))
+        }
+        return <AsyncLoader<${x.name}[]> async={props.appState.page.entityData.${x.name}s}
+            onLoad={(res) => props.setState(set_${x.name}s(res))}
+        >
+            <Table${x.name} {...props} />
+        </AsyncLoader>
+    }
+
+    `, "")}
+
+
+    return <div>
+        <h3>Table not found</h3>
+
+        <p>
+            This table does not exist in your database, or the admin panel does not contain a definition for it.
+        </p>
+    </div>
+}
+        `
+    }
+}
+
+
+export const dataForm_snippet = (app: Application): Snippet => {
+    let models = app.models.toIndexedSeq().toArray()
+
+    return {
+        name: 'src/components/shared/DataForm/DataForm.tsx', 
+        content: `
+        import * as React from "react"
+import { IAppState } from "../../../AppState";
+import { loadingAsyncState } from "../../../utils";
+
+import { ${models.reduce((xs, x) => xs + `set_${x.name}s, ` ,"")} } from "../../Admin/AdminData"
+
+${models.reduce((xs, x) => xs + `
+import { get${x.name}ById } from "../../${x.name}/${x.name}.api";
+import { Form${x.name} } from "../../${x.name}/Form${x.name}";
+`, "")}
+
+interface DataFormProps extends IAppState {
+
+}
+
+
+export const DataForm = (props: DataFormProps) => {
+    if (props.appState.page.kind != 'admin') return <div></div>
+
+
+    ${models.reduce((xs, x) => xs + `
+    if (props.appState.page.entityData.kind == '${x.name}') {
+        if ((props.appState.page.entityData.current${x.name}.data.kind == 'unloaded') && props.route.match.params.action == 'edit' && props.route.match.params.id && !isNaN(Number(props.route.match.params.id))) {
+            props.setState(setCurrent${x.name}(loadingAsyncState(() => get${x.name}ById(Number(props.route.match.params.id)))))
+        }
+        return <Form${x.name} {...props} />
+    }
+
+    `, "")}
+
+    return <div>
+        <h1>No form found</h1>
+    </div>
+}
+
+        `
+    }
+}
