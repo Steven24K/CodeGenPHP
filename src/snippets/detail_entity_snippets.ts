@@ -28,7 +28,7 @@ export const EntityApi_snippet = (model: Model): Snippet => {
 import { ${model.name} } from "../../models/${model.name}";
 import { HttpResult } from "../../utils";
 
-export const get${model.name}s = (): Promise<HttpResult<${model.name}[]>> =>
+export const get_${model.name}s = (): Promise<HttpResult<${model.name}[]>> =>
     fetch(ORIGIN + "/api/" + API_VERSION + "/${model.name}/Get.php")
         .then(response => {
             if (response.ok) {
@@ -112,17 +112,17 @@ export const delete${model.name} = (id: number): Promise<any> =>
     }
 }
 
-export const EntitDetailComponent_snippet = (model: Model): Snippet => {
+export const EntityDetailComponent_snippet = (model: Model): Snippet => {
     let attrs = model.attributes.toIndexedSeq().toArray()
     return {
-        name: `src/components/${model.name}/Detail${model.name}.tsx}`, 
+        name: `src/components/${model.name}/Detail${model.name}.tsx`, 
         content: `
         import * as React from "react"
 import { NavLink } from "react-router-dom"
 import { IAppState } from "../../AppState"
 import { ${model.name} } from "../../models/${model.name}"
 import { loadingAsyncState } from "../../utils"
-import { setCurrent_${model.name} } from "../Admin/AdminData"
+import { setCurrent_${model.name} } from "../AdminFrontend/AdminData"
 import { AsyncLoader } from "../shared/AsyncLoader"
 import { get${model.name}ById } from "./${model.name}.api"
 
@@ -167,7 +167,7 @@ export const Detail${model.name} = (props: ${model.name}DetailProps) => {
 
 
 export const EntityFormComponent_snippet = (model: Model): Snippet => {
-    let attrs_selected = model.attributes.remove('Id').toIndexedSeq().toArray().reduce((xs, x) => xs + ` '${x}', `, "")
+    let attrs_selected = model.attributes.remove('Id').toIndexedSeq().toArray().reduce((xs, x) => xs + ` '${x.name}', `, "")
     return {
         name: `src/components/${model.name}/Form${model.name}.tsx`, 
         content: `
@@ -179,7 +179,7 @@ import { Func } from "../../FormBuilder/utils/Func";
 import { omitOne } from "../../FormBuilder/utils/Omit";
 import { ${model.name} } from "../../models/${model.name}";
 import { loadedAsyncState, loadingAsyncState, unloadedAsyncState } from "../../utils";
-import { setCurrent_${model.name} } from "../Admin/AdminData";
+import { setCurrent_${model.name} } from "../AdminFrontend/AdminData";
 import { AsyncLoader } from "../shared/AsyncLoader";
 import { Default${model.name} } from "./Default${model.name}";
 import { create${model.name}, get${model.name}ById, update${model.name} } from "./${model.name}.api";
@@ -382,11 +382,11 @@ import { NavLink } from "react-router-dom"
 import { IAppState } from "../../AppState"
 import { ${model.name} } from "../../models/${model.name}"
 import { loadingAsyncState, none, some, unloadedAsyncState } from "../../utils"
-import { set_${model.name}s } from "../Admin/AdminData"
+import { set_${model.name}s } from "../AdminFrontend/AdminData"
 import { AsyncLoader } from "../shared/AsyncLoader"
 import { Loader } from "../shared/Loader"
 import { Modal } from "../shared/Modal/Modal"
-import { delete${model.name}, get${model.name}s } from "./${model.name}.api"
+import { delete${model.name}, get_${model.name}s } from "./${model.name}.api"
 
 interface ${model.name}TableProps extends IAppState {
 
@@ -397,7 +397,7 @@ export const Table${model.name} = (props: ${model.name}TableProps) => {
     if (props.appState.page.entityData.kind != '${model.name}') return <div></div>
 
     if (props.appState.page.entityData.${model.name}s.kind == 'unloaded') {
-        props.setState(set_${model.name}s(loadingAsyncState(() => get${model.name}s())))
+        props.setState(set_${model.name}s(loadingAsyncState(() => get_${model.name}s())))
     }
 
     return <div className="card mb-4">
@@ -453,9 +453,9 @@ export const Table${model.name} = (props: ${model.name}TableProps) => {
                             :
                             <div>
                                 <h2>No data</h2>
-                                <a role="button" className="btn btn-primary">
-                                    Create some ${model.name}
-                                </a>
+                                <NavLink to={"/admin/${model.name}/create"} role="button" className="btn btn-primary">
+                                    Create some product
+                                </NavLink>
                             </div>
                         : <Loader />}
 

@@ -1,7 +1,7 @@
 import * as React from "react"
-import { Redirect } from "react-router"
+import { Redirect } from "react-router-dom"
 import { IAppState } from "../../AppState"
-import { AdminComponent } from "../../components/Admin/AdminComponent"
+import { AdminComponent } from "../../components/AdminFrontend/AdminComponent"
 import { zeroAdminState } from "./AdminPageState"
 import { AdminRoutes } from "./adminRoutes"
 

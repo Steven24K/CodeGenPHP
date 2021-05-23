@@ -1,6 +1,6 @@
 import { Map } from "immutable";
 import { SideBarItemState } from "../../components/shared/SideBarItem";
-import { EntityData, zeroEntityData } from "../../components/Admin/AdminData";
+import { EntityData, zeroEntityData } from "../../components/AdminFrontend/AdminData";
 import { AsyncState, unloadedAsyncState } from "../../utils";
 import { EntityPermission } from "../../types/EntityPermission";
 

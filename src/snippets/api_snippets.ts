@@ -31,7 +31,7 @@ export const GetApiCall_snippet = (app: Application) => (model: Model): Snippet 
         if (count($data) === 0) {
             echo json_encode(new HttpResult([], 404));
         } else {
-            echo json_encode(new HttpResult($data[0], 200));
+            echo json_encode(new HttpResult($data, 200));
         }
     } else {
         $result = $connection->GetQueryResult("SELECT * FROM ${model.name}");
@@ -169,10 +169,10 @@ export const UpdateApiCall_snippet = (app: Application) => (model: Model): Snipp
         if ($result === TRUE) {
             echo json_encode(new HttpResult($result, 200));
         } else {
-            echo json_encode(new HttpResult($result, 500));
+            echo json_encode(new HttpResult($result, 200));
         }
     } else {
-        echo json_encode(new HttpResult('Not all fields are filled in correctly', 402));
+        echo json_encode(new HttpResult('Not all fields are filled in correctly', 201));
     }
     `
 

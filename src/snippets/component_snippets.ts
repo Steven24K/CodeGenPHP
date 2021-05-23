@@ -20,7 +20,7 @@ export const adminRoutes_snippet = (app: Application): Snippet => {
     return ({
         name: 'src/pages/Admin/adminRoutes.tsx',
         content: `import * as React from "react"
-        import { Route, Switch } from "react-router"
+        import { Route, Switch } from "react-router-dom"
         import { IAppState } from "../../AppState"
         import { AdminHomePage } from "./AdminHome"
         import { AdminNotFoundPage } from "./AdminNotFound"
@@ -41,7 +41,7 @@ export const AdminPages_snippet = (model: Model): Snippet => {
         name: `src/pages/Admin/${model.name}/Admin${model.name}Page.tsx`,
         content: `import * as React from "react"
         import { IAppState } from "../../../AppState"
-        import { zero${model.name}EntityData } from "../../../components/Admin/AdminData"
+        import { zero${model.name}EntityData } from "../../../components/AdminFrontend/AdminData"
         import { routeHasChanged } from "../../../utils"
         import { Table${model.name} } from "../../../components/${model.name}/Table${model.name}"
         import { Detail${model.name} } from "../../../components/${model.name}/Detail${model.name}"
@@ -141,7 +141,7 @@ import { AsyncLoader } from "../AsyncLoader"
 
 ${models.reduce((xs, x) => xs + `
 import { ${x.name} } from "../../../models/${x.name}"
-import { setCurrent${x.name} } from "../../Admin/AdminData"
+import { setCurrent_${x.name} } from "../../AdminFrontend/AdminData"
 import { get${x.name}ById } from "../../${x.name}/${x.name}.api"
 import { Detail${x.name} } from "../../${x.name}/Detail${x.name}"
 `, "")}
@@ -173,10 +173,10 @@ const PageSwitcher = (props: DetailPageProps) => {
     ${models.reduce((xs, x) => xs + `
     if (props.appState.page.entityData.kind == '${x.name}' && props.route.match.params.id && !isNaN(Number(props.route.match.params.id))) {
         if (props.appState.page.entityData.current${x.name}.data.kind == 'unloaded') {
-            props.setState(setCurrent${x.name}(loadingAsyncState(() => get${x.name}ById(Number(props.route.match.params.id)))))
+            props.setState(setCurrent_${x.name}(loadingAsyncState(() => get${x.name}ById(Number(props.route.match.params.id)))))
         }
         return <AsyncLoader<${x.name}> async={props.appState.page.entityData.current${x.name}.data}
-            onLoad={res => props.setState(setCurrent${x.name}(res))}>
+            onLoad={res => props.setState(setCurrent_${x.name}(res))}>
             <Detail${x.name} {...props} />
         </AsyncLoader>
     }
@@ -210,7 +210,7 @@ import { get_${x.name}s } from "../../${x.name}/${x.name}.api"
 import { Table${x.name} } from "../../${x.name}/Table${x.name}"
 `, "")}
 
-import { ${models.reduce((xs, x) => xs + `set_${x.name}s, ` ,"")} } from "../../Admin/AdminData"
+import { ${models.reduce((xs, x) => xs + `set_${x.name}s, ` ,"")} } from "../../AdminFrontend/AdminData"
 import './DataTable.css'
 
 interface DataTableProps extends IAppState {
@@ -276,7 +276,7 @@ export const dataForm_snippet = (app: Application): Snippet => {
 import { IAppState } from "../../../AppState";
 import { loadingAsyncState } from "../../../utils";
 
-import { ${models.reduce((xs, x) => xs + `set_${x.name}s, ` ,"")} } from "../../Admin/AdminData"
+import { ${models.reduce((xs, x) => xs + `setCurrent_${x.name}, ` ,"")} } from "../../AdminFrontend/AdminData"
 
 ${models.reduce((xs, x) => xs + `
 import { get${x.name}ById } from "../../${x.name}/${x.name}.api";
@@ -295,7 +295,7 @@ export const DataForm = (props: DataFormProps) => {
     ${models.reduce((xs, x) => xs + `
     if (props.appState.page.entityData.kind == '${x.name}') {
         if ((props.appState.page.entityData.current${x.name}.data.kind == 'unloaded') && props.route.match.params.action == 'edit' && props.route.match.params.id && !isNaN(Number(props.route.match.params.id))) {
-            props.setState(setCurrent${x.name}(loadingAsyncState(() => get${x.name}ById(Number(props.route.match.params.id)))))
+            props.setState(setCurrent_${x.name}(loadingAsyncState(() => get${x.name}ById(Number(props.route.match.params.id)))))
         }
         return <Form${x.name} {...props} />
     }

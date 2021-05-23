@@ -5,10 +5,12 @@ import { Func } from "../utils/Func";
 import { Snippet } from "../utils/types";
 import { CreateApiCall_snippet, CreateManyApi_snippet, CreateManyRelations_snippet, CreateRelation_snippet, DeleteApiCall_snippet, DeleteManyApi_snippet, DeleteManyRelations_snippet, DeleteRelation_snippet, GetApiCall_snippet, GetEntityWithRelation_snippet, GetRelation_snippet, UpdateApiCall_snippet, UpdateManyApi_snippet, UpdateManyRelations_snippet, UpdateRelation_snippet } from "./api_snippets";
 import { login_snippet } from "./auth_snippet";
-import { AdminPages_snippet, adminRoutes_snippet, AppRoles_snippet, loginUtils_snippet, typescriptInterfaces_snippet } from "./component_snippets";
+import { AdminPages_snippet, adminRoutes_snippet, AppRoles_snippet, dataForm_snippet, dataTable_snippet, detailPage_snippet, loginUtils_snippet, typescriptInterfaces_snippet } from "./component_snippets";
 import { CreateConfig_snippet, frontend_constants_snippets } from "./config_snippets";
+import { DefaultEntity_snippet, EntityDetailComponent_snippet, EntityApi_snippet, EntityFormComponent_snippet, EntityTableComponent_snippet } from "./detail_entity_snippets";
 import { getEntitiesBasedOnRole_snippet } from "./permission_snippets";
 import { initDatabase_snippet, seedDatabase_snippet } from "./sql_snippets";
+import { adminData_snippet } from "./types_snippet";
 
 
 
@@ -22,6 +24,11 @@ const ModelSnippets: Func<Application, Func<Model, Snippet>[]> = Func(app => [
     Func(m => DeleteManyApi_snippet(app)(m)),
     Func(m => AdminPages_snippet(m)),
     Func(m => typescriptInterfaces_snippet(m)),
+    Func(m => DefaultEntity_snippet(m)), 
+    Func(m => EntityApi_snippet(m)), 
+    Func(m => EntityDetailComponent_snippet(m)), 
+    Func(m => EntityFormComponent_snippet(m)), 
+    Func(m => EntityTableComponent_snippet(m)), 
 ])
 
 const RelationSnippets: Func<Application, Func<Relation, Snippet>[]> = Func(app => [
@@ -50,6 +57,10 @@ export const AppToSnippets: Func<Application, Snippet[]> = Func(app => {
         AppRoles_snippet(app),
         adminRoutes_snippet(app),
         loginUtils_snippet(app),
+        detailPage_snippet(app), 
+        dataTable_snippet(app), 
+        dataForm_snippet(app),
+        adminData_snippet(app), 
     ]
         .concat(models.flatMap(m => ModelSnippets.f(app).flatMap(f => {
             let snippet = f.f(m)

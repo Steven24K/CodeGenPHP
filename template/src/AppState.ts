@@ -22,8 +22,8 @@ export const setLoginState = (newLoginState: Either<LoginState, Message>) => (s:
 }
 
 export type RouteParams = Partial<{
-    id: string
-    action: "edit" | "create" | "view"
+    id? : string
+    action?: string //"edit" | "create" | "view"
 }>
 
 export interface IAppState {

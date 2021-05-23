@@ -5,7 +5,7 @@ export const adminData_snippet = (app: Application): Snippet => {
     let models = app.models.toIndexedSeq().toArray()
 
     return ({
-        name: 'src/components/Admin/AdminData.ts', 
+        name: 'src/components/AdminFrontend/AdminData.ts', 
         content: `
         import { AppState } from "../../AppState";
         import { AsyncState, FormState, EditStateMachine, none, Option, unloadedAsyncState, FormKinds } from "../../utils";
@@ -52,7 +52,7 @@ export const set_${x.name}s = (new_${x.name}: AsyncState<${x.name}[]>) => (s: Ap
     })
 }
 
-export const setCurrent${x.name} = (new_${x.name}: AsyncState<${x.name}>, editState?: EditStateMachine) => (s: AppState): AppState => {
+export const setCurrent_${x.name} = (new_${x.name}: AsyncState<${x.name}>, editState?: EditStateMachine) => (s: AppState): AppState => {
     if (s.page.kind != 'admin') return s
     if (s.page.entityData.kind != '${x.name}') return s
     return ({
@@ -75,7 +75,7 @@ export const setCurrent${x.name} = (new_${x.name}: AsyncState<${x.name}>, editSt
 
 //All entities in one discriminated union
 export type EntityData = ${models.reduce((xs, x) => xs + `${x.name}EntityData\n |`, "")}
-    | { kind: 'no-entity' }
+     { kind: 'no-entity' }
 
 export const zeroEntityData = (): EntityData => ({
     kind: 'no-entity'
