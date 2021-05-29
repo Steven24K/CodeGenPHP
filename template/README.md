@@ -19,13 +19,17 @@ Git: [repo](https://github.com/Steven24K/CodeGenPHP)
 2. Run `npm install`
 3. Run `npm run start` to see if everything is setup correctly
 4. Copy the content of config.Example.php to config.php and fill in database credentials
+5. Create your database in, PhpMyAdmin via XAMPP is the easiest way to do it. 
 
 ## Running 
-`yarn backend` To start a php dev server 
+`yarn backend` To start a php dev server on http://localhost:8080
 
 `yarn watch` To compile the frontend
 
 *That's it and you're ready to go!*
+
+### First time running 
+When running for the first time visit http://localhost:8080/init.php to create all the database tables and visit http://localhost:8080/seed.php to insert some data in your database. 
 
 ## Commands 
 `npm run start` Start the webpack development server, with hot module replacement(HRM). 
