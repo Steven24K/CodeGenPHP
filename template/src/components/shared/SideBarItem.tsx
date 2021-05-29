@@ -6,6 +6,10 @@ import { AppState, IAppState } from '../../AppState'
 export interface SideBarItemState {
     title: string
     panelState: 'open' | 'closed'
+    can_create: boolean
+    can_view: boolean
+    can_edit: boolean
+    can_delete: boolean
 }
 
 interface SideBarItemProps extends IAppState {
@@ -14,7 +18,6 @@ interface SideBarItemProps extends IAppState {
 }
 
 export const SideBarItem = (props: SideBarItemProps) => {
-
 
     const toggleSidebarItems = (s: AppState): AppState => {
         if (s.page.kind != 'admin') return s
@@ -39,7 +42,7 @@ export const SideBarItem = (props: SideBarItemProps) => {
         <div className={`collapse ${props.item.panelState == 'open' ? 'show' : ''}`} id="collapseLayouts">
             <nav className="sb-sidenav-menu-nested nav">
                 <NavLink className="nav-link" to={`/admin/${props.item.title}`}>Show records</NavLink>
-                <NavLink className="nav-link" to={`/admin/${props.item.title}/create/`}>Add {props.item.title}</NavLink>
+                {props.item.can_create && <NavLink className="nav-link" to={`/admin/${props.item.title}/create/`}>Add {props.item.title}</NavLink>}
                 {props.children}
             </nav>
         </div>

@@ -86,13 +86,7 @@ function can_delete($entity, $role) {
         ${models.map(m => `'${m.name}'`).toString()}
     );
 
-    // Maybe this filter is not needed
-    $entities = array_filter($entities, function ($e) {
-        global $role;
-        return can_view($e, $role);
-    });
-
-    $result = array_map(function ($e) {
+    $permissions = array_map(function ($e) {
         global $role;
         return array(
             "entity" => $e,
@@ -102,6 +96,14 @@ function can_delete($entity, $role) {
             "can_delete" => can_delete($e, $role)
             );
     }, $entities);
+
+    $result = array();
+    foreach ($permissions as $value) {
+        global $role; 
+        if ($value["can_view"]) {
+            array_push($result, $value);
+        }
+    }
 
     echo json_encode(new HttpResult($result, 200));
 } else {

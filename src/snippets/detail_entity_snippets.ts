@@ -137,11 +137,13 @@ export const Detail${model.name} = (props: ${model.name}DetailProps) => {
     if (props.appState.page.entityData.current${model.name}.data.kind == 'unloaded') {
         props.setState(setCurrent_${model.name}(loadingAsyncState(() => get${model.name}ById(Number(props.route.match.params.id)))))
     }
+
+    let current_permission = props.appState.page.sidePanelState.get('${model.name}')
     
     return <div>
         <div>
             {
-                props.route.match.params.id &&
+                current_permission && current_permission.can_edit && props.route.match.params.id &&
                 <NavLink className="btn btn-primary" to={"/admin/${model.name}/edit/" + props.route.match.params.id}>Edit ${model.name}</NavLink>
             }
         </div>
@@ -288,6 +290,8 @@ export const Form${model.name} = (props: ${model.name}FormProps) => {
         props.setState(setCurrent_${model.name}(loadingAsyncState(() => get${model.name}ById(Number(props.route.match.params.id)))))
     }
 
+    let current_permission = props.appState.page.sidePanelState.get('${model.name}')
+
     return <div>
         {
             props.appState.page.entityData.${model.name}Form.kind == 'submitted' && <div className="alert alert-success" role="alert">
@@ -307,7 +311,11 @@ export const Form${model.name} = (props: ${model.name}FormProps) => {
           </div>
         }
 
-        <button className="btn btn-primary"
+        {(
+            (current_permission && current_permission.can_create && props.route.match.params.action == 'create') 
+        || (current_permission && current_permission.can_edit && props.route.match.params.action == 'edit')
+        )
+         && <button className="btn btn-primary"
             onClick={() => submitForm(props)}
             disabled={props.route.match.params.action == 'create' && (props.appState.page.entityData.${model.name}Form.kind == 'unsubmitted' ||
                 props.appState.page.entityData.${model.name}Form.kind == 'submitted' ||
@@ -318,9 +326,9 @@ export const Form${model.name} = (props: ${model.name}FormProps) => {
                 props.route.match.params.action == 'edit' ?
                     "Save edits" : "Create ${model.name}"
             }
-        </button>
+        </button>}
         {
-            props.route.match.params.action == 'edit' && props.route.match.params.id &&
+            current_permission && current_permission.can_view && props.route.match.params.action == 'edit' && props.route.match.params.id &&
             <NavLink className="btn btn-info" to={"/admin/" + props.appState.page.entityData.kind + "/view/" + props.route.match.params.id}>View</NavLink>
         }
 
@@ -332,7 +340,7 @@ export const Form${model.name} = (props: ${model.name}FormProps) => {
 
 
         {
-            props.route.match.params.action == 'create' ?
+            current_permission && current_permission.can_create && props.route.match.params.action == 'create' ?
                 <FormMaster<${model.name}>
                     id_prefix="${model.name}_form"
                     defaultData={[props.appState.page.entityData.${model.name}Form.data]}
@@ -340,6 +348,7 @@ export const Form${model.name} = (props: ${model.name}FormProps) => {
                     query={Func(q => q.Select(${attrs_selected}))}
                 />
                 :
+                current_permission && current_permission.can_edit ?
                 <AsyncLoader<${model.name}> async={props.appState.page.entityData.current${model.name}.data}
                     onLoad={res => props.setState(s => {
                         if (s.page.kind != 'admin') return s
@@ -363,6 +372,8 @@ export const Form${model.name} = (props: ${model.name}FormProps) => {
                         />}
 
                 </AsyncLoader>
+                :
+                <div>Permission denied</div>
         }
 
     </div>
@@ -396,6 +407,8 @@ export const Table${model.name} = (props: ${model.name}TableProps) => {
     if (props.appState.page.kind != 'admin') return <div></div>
     if (props.appState.page.entityData.kind != '${model.name}') return <div></div>
 
+    let current_permission = props.appState.page.sidePanelState.get('${model.name}')
+
     if (props.appState.page.entityData.${model.name}s.kind == 'unloaded') {
         props.setState(set_${model.name}s(loadingAsyncState(() => get_${model.name}s())))
     }
@@ -428,8 +441,8 @@ export const Table${model.name} = (props: ${model.name}TableProps) => {
                                             <td className="right">
                                                 <ul className='entity-modifiers'>
                                                     <li><NavLink to={"/admin/${model.name}/view/"+ entity.Id}>Detail</NavLink></li>
-                                                    <li><NavLink to={"/admin/${model.name}/edit/" + entity.Id}>Edit</NavLink></li>
-                                                    <li><a role="button" className='danger' onClick={async () => {
+                                                    {current_permission && current_permission.can_edit && <li><NavLink to={"/admin/${model.name}/edit/" + entity.Id}>Edit</NavLink></li>}
+                                                    {current_permission && current_permission.can_delete && <li><a role="button" className='danger' onClick={async () => {
                                                         props.setState(s => {
                                                             if (s.page.kind != 'admin') return s
                                                             if (s.page.entityData.kind != '${model.name}') return s
@@ -442,7 +455,7 @@ export const Table${model.name} = (props: ${model.name}TableProps) => {
                                                                 }
                                                             })
                                                         })
-                                                    }}>Delete</a></li>
+                                                    }}>Delete</a></li>}
                                                 </ul>
                                             </td>
                                         </tr>)

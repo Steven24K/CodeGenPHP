@@ -68,11 +68,15 @@ export const AdminPages_snippet = (model: Model): Snippet => {
             }
         
             render() {
-                // TODO: Nested routing could also be applied here.
+                if (this.props.appState.page.kind != 'admin') return null
+
+                let current_permission = this.props.appState.page.sidePanelState.get('product')
+
+                // Nested routing could also be applied here.
                 return <>
-                    {!this.props.route.match.params.id && !this.props.route.match.params.action && <Table${model.name} {...this.props} />}
+                    {current_permission && current_permission.can_view && !this.props.route.match.params.id && !this.props.route.match.params.action && <Table${model.name} {...this.props} />}
         
-                    {this.props.route.match.params.id && this.props.route.match.params.action == 'view' && <Detail${model.name} {...this.props} />}
+                    {current_permission && current_permission.can_view && this.props.route.match.params.id && this.props.route.match.params.action == 'view' && <Detail${model.name} {...this.props} />}
         
                     {(this.props.route.match.params.id && this.props.route.match.params.action == 'edit' || this.props.route.match.params.action == 'create') && <Form${model.name} {...this.props} />}
          

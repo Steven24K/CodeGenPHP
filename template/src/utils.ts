@@ -1,4 +1,6 @@
 import { RouteParams } from "./AppState"
+import { SideBarItemState } from "./components/shared/SideBarItem"
+import { EntityPermission } from "./types/EntityPermission"
 
 export type Option<a> = ({
     kind: 'some'
@@ -89,3 +91,12 @@ export const loadedAsyncState = <a>(v: a): AsyncState<a> => ({ kind: 'loaded', v
 export const loadingAsyncState = <a>(p: () => Promise<HttpResult<a>>): AsyncState<a> => ({ kind: 'loading', promise: p })
 
 export type EditStateMachine = 'idle' | 'editing' | "updating" | "updated" | "update-failed"
+
+export const Permission_to_sidebarItemState = (p: EntityPermission): SideBarItemState => ({
+    title: p.entity, 
+    panelState: 'closed',
+    can_create: p.can_create, 
+    can_delete: p.can_delete, 
+    can_edit: p.can_edit, 
+    can_view: p.can_view
+})

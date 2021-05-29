@@ -7,7 +7,7 @@ import { getAllowedEntities } from "./Admin.api";
 import { SideBarItem, SideBarItemState } from "../shared/SideBarItem";
 import { logout } from "../Login/login.api";
 import { omitOne } from "../../FormBuilder/utils/Omit";
-import { loadingAsyncState } from "../../utils";
+import { loadingAsyncState, Permission_to_sidebarItemState } from "../../utils";
 import { AsyncLoader } from "../shared/AsyncLoader";
 import { EntityPermission } from "../../types/EntityPermission";
 
@@ -30,10 +30,6 @@ const setUserPanelState = (newValue: 'open' | 'closed') => (s: AppState): AppSta
     return ({ ...s, page: { ...s.page, userPanelState: newValue } })
 }
 
-const setAdminEntities = (newEntities: string[]) => (s: AppState): AppState => {
-    if (s.page.kind != 'admin') return s
-    return ({ ...s, page: { ...s.page, sidePanelState: newEntities.reduce((xs, x) => xs.set(x, { title: x, panelState: 'closed' }), Map<string, SideBarItemState>()) } })
-}
 
 export const AdminComponent = (props: AdminComponentProps) => {
     if (props.appState.page.kind != 'admin') return <div></div>
@@ -99,7 +95,7 @@ export const AdminComponent = (props: AdminComponentProps) => {
                                         ...s, page: {
                                             ...s.page,
                                             sideMenu: res,
-                                            sidePanelState: res.kind == 'loaded' ? res.value.reduce((xs, x) => xs.set(x.entity, { title: x.entity, panelState: 'closed' }), Map<string, SideBarItemState>()) : Map()
+                                            sidePanelState: res.kind == 'loaded' ? res.value.reduce((xs, x) => xs.set(x.entity, Permission_to_sidebarItemState(x)), Map<string, SideBarItemState>()) : Map()
                                         }
                                     })
                                 })}
