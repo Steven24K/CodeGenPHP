@@ -189,7 +189,7 @@ export const UpdateApiCall_snippet = (app: Application) => (model: Model): Snipp
             die("Request not allowed");
         }
     
-        ${model.permissions.update.count() > 0 ? snippet : Permission_snippet(model.permissions.update.toArray(), snippet)}
+        ${model.permissions.update.count() == 0 ? snippet : Permission_snippet(model.permissions.update.toArray(), snippet)}
     
         `)
     })

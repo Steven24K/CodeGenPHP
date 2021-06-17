@@ -467,7 +467,7 @@ export const Table${model.name} = (props: ${model.name}TableProps) => {
                             <div>
                                 <h2>No data</h2>
                                 <NavLink to={"/admin/${model.name}/create"} role="button" className="btn btn-primary">
-                                    Create some product
+                                    Create some ${model.name}
                                 </NavLink>
                             </div>
                         : <Loader />}

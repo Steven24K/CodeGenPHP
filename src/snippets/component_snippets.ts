@@ -70,7 +70,7 @@ export const AdminPages_snippet = (model: Model): Snippet => {
             render() {
                 if (this.props.appState.page.kind != 'admin') return null
 
-                let current_permission = this.props.appState.page.sidePanelState.get('product')
+                let current_permission = this.props.appState.page.sidePanelState.get('${model.name}')
 
                 // Nested routing could also be applied here.
                 return <>
